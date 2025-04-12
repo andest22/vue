@@ -12,28 +12,28 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center my-3">
-  <router-link to="/Create-Services" class="btn btn-agregar">
-    <img :src="personPlus" style="width: 20px; height: 20px; margin-right: 5px;" />
-    Agregar
-  </router-link>
+      <router-link to="/Create-Services" class="btn btn-agregar">
+        <img :src="personPlus" style="width: 20px; height: 20px; margin-right: 5px;" />
+        Agregar
+      </router-link>
 
-  <router-link to="/Services-Inactivos" class="btn btn-secondary">
-    Servicios Inactivos
-  </router-link>
-</div>
+      <router-link to="/Services-Inactivos" class="btn btn-secondary">
+        Servicios Inactivos
+      </router-link>
+    </div>
 
-    
+    <!-- Contenedor principal -->
+    <div class="d-flex flex-wrap justify-content-center gap-4 align-items-start">
 
-    <!-- Servicios por categoría -->
-    <div class="row justify-content-center">
-      <div class="col-md-10">
+      <!-- Servicios por categoría -->
+      <div class="col-lg-8">
         <div v-for="(services, category) in servicesByCategory" :key="category" class="service-category">
           <h3 :id="getCategoryId(category)" class="text-center text-uppercase category-title">
             {{ category }}
           </h3>
 
           <div class="d-flex flex-column align-items-center">
-            <div class="service-section w-75 mb-5" v-for="service in services" :key="service.id_services">
+            <div class="service-section w-100 mb-5" v-for="service in services" :key="service.id_services">
               <div class="card">
                 <div class="card-body d-flex">
                   <!-- Imagen del servicio -->
@@ -60,6 +60,24 @@
           </div>
         </div>
       </div>
+
+      <!-- Recuadro de servicios seleccionados -->
+      <div v-if="selectedServices.length" class="selected-service-box card text-white bg-dark p-4">
+        <h4 class="mb-3">Servicios Seleccionados</h4>
+        <ul class="list-unstyled">
+          <li v-for="service in selectedServices" :key="service.id_services" class="mb-2">
+            <strong>{{ service.name_service }}</strong> - ${{ service.price }}
+            <button class="btn btn-sm btn-outline-danger ms-2" @click="removeSelected(service.id_services)">X</button>
+          </li>
+        </ul>
+
+        <p class="mt-3"><strong>Total:</strong> ${{ totalPrice }}</p>
+
+        <div class="d-flex justify-content-between mt-3">
+          <button class="btn btn-danger" @click="clearAllSelected">Eliminar selección</button>
+          <button class="btn btn-success">Continuar</button>
+        </div>
+      </div>
     </div>
 
     <!-- Botón Regresar -->
@@ -83,8 +101,9 @@ import '@/assets/css/services.css';
 
 const router = useRouter();
 const services = ref([]);
+const selectedServices = ref([]); // Múltiples servicios seleccionados
 
-// Cargar servicios desde la base de datos
+// Cargar servicios
 const fetchServices = async () => {
   try {
     services.value = await getAllServices();
@@ -94,7 +113,7 @@ const fetchServices = async () => {
   }
 };
 
-// Agrupa los servicios por su nombre de categoría
+// Agrupar servicios por categoría
 const servicesByCategory = computed(() => {
   const categorized = {};
   services.value.forEach(service => {
@@ -107,17 +126,38 @@ const servicesByCategory = computed(() => {
   return categorized;
 });
 
-// Crea un ID limpio para anclaje
+// Crear ID de categoría para anclaje
 const getCategoryId = (category) => {
   return category.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 };
 
-// Retorna imagen o imagen por defecto
+// Obtener imagen del servicio
 const getServiceImage = (image) => {
   return image ? `/background/${image}` : '/img/background/combo01.png';
 };
 
-// Confirmar eliminación (CORREGIDO)
+// Seleccionar múltiples servicios sin duplicar
+const selectService = (service) => {
+  const exists = selectedServices.value.find(s => s.id_services === service.id_services);
+  if (!exists) selectedServices.value.push(service);
+};
+
+// Eliminar un servicio seleccionado
+const removeSelected = (id) => {
+  selectedServices.value = selectedServices.value.filter(s => s.id_services !== id);
+};
+
+// Limpiar toda la selección
+const clearAllSelected = () => {
+  selectedServices.value = [];
+};
+
+// Calcular el total
+const totalPrice = computed(() => {
+  return selectedServices.value.reduce((sum, s) => sum + parseFloat(s.price || 0), 0).toFixed(2);
+});
+
+// Confirmar eliminación
 const confirmDelete = async (id) => {
   if (!id) {
     console.error("ID inválido para eliminar:", id);
@@ -126,11 +166,9 @@ const confirmDelete = async (id) => {
   }
 
   const confirmar = confirm('¿Estás seguro de eliminar este servicio?');
-
   if (!confirmar) return;
 
   try {
-    console.log("Eliminando servicio con ID:", id);
     await deleteService(id);
     alert("✅ Servicio eliminado correctamente.");
     await fetchServices();
@@ -140,7 +178,7 @@ const confirmDelete = async (id) => {
   }
 };
 
-// Redirigir a página anterior
+// Volver atrás
 const goBack = () => router.push('/Home');
 
 onMounted(fetchServices);
@@ -173,9 +211,15 @@ onMounted(fetchServices);
   font-size: 1.8rem;
 }
 
-/* Animación de scroll suave */
-html {
-  scroll-behavior: smooth;
+/* Recuadro servicio seleccionado */
+.selected-service-box {
+  max-width: 350px;
+  min-width: 280px;
+  border: 2px solid #444;
+  border-radius: 12px;
+  background-color: #111;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  align-self: flex-start;
 }
 
 /* Botón regresar */
