@@ -13,11 +13,15 @@
       <div class="pedido-container">
         <div v-for="service in inactiveServices" :key="service.id_services" class="pedido-box">
           <div class="service-info">
-            <h6><strong>Servicio</strong></h6>
-            <h5 class="service-name">{{ service.name_service }}</h5>
-
-            <h6 class="mt-2"><strong>Descripción</strong></h6>
-            <p class="service-description">{{ service.description }}</p>
+            <div class="info-row">
+              <h5 class="info-title">Servicio</h5>
+              <p class="info-text">{{ service.name_service }}</p>
+            </div>
+            <div class="info-row">
+              <h5 class="info-title">Descripción</h5>
+              <p class="info-text">{{ service.description }}</p>
+            </div>
+            
           </div>
           <button class="activate-btn" @click="activateServiceHandler(service)">Activar</button>
         </div>
@@ -77,15 +81,48 @@ onMounted(loadInactiveServices);
 .activate-btn:hover {
   background-color: #8a7432;
 }
+.pedido-box {
+  display: flex;
+  align-items: center; /* Centra el contenido verticalmente */
+  justify-content: space-between; /* Espacia el contenido */
+  padding: 20px;
+}
 .service-info {
-  margin-bottom: 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra horizontalmente */
+  text-align: center;
 }
-.service-name {
+.info-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+.info-title {
+  color: #CCAF54;
+  font-size: 1.25rem;
   font-weight: bold;
-  margin: 0;
+  margin-bottom: 5px;
 }
-.service-description {
-  margin: 0;
-  color: #aaa;
+.info-text {
+  font-size: 1rem;
+  color: #ffffff;
+}
+.back-button {
+  background-color: #444; /* Color de fondo oscuro */
+  color: #fff; /* Texto en blanco */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+.back-button:hover {
+  background-color: #666; /* Color más claro al pasar el mouse */
 }
 </style>
