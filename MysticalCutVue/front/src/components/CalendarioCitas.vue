@@ -1,4 +1,3 @@
-<!-- CalendarioCitas.vue -->
 <template>
   <div class="container">
     <header class="custom-header">
@@ -56,10 +55,10 @@
           <p v-if="selectedTime">Hora: {{ selectedTime }}</p>
 
           <div v-if="selectedServices.length">
-            <p><strong>Servicios:</strong></p>
+            <p><strong>Servicio:</strong></p>
             <ul>
-              <li v-for="(servicio, index) in selectedServices" :key="index">
-                {{ servicio.name_service }} - ${{ servicio.price }}
+              <li>
+                {{ selectedServices[0].name_service }} - ${{ selectedServices[0].price }}
               </li>
             </ul>
           </div>
@@ -95,7 +94,6 @@ export default {
       barberName: '',
       userId: null,
       selectedServices: [],
-      serviceIds: [],
       availableTimes: [
         '8:00 a.m.', '9:00 a.m.', '10:00 a.m.', '11:00 a.m.',
         '12:00 p.m.', '1:00 p.m.', '2:00 p.m.', '3:00 p.m.',
@@ -184,6 +182,11 @@ export default {
         return;
       }
 
+      if (!this.selectedServices.length || this.selectedServices.length !== 1) {
+        alert('Debes seleccionar un único servicio para la cita.');
+        return;
+      }
+
       const dateTimeStr = `${this.selectedDate}T${this.selectedTime}:00`;
       const dateTime = new Date(dateTimeStr);
       const endTime = new Date(dateTime.getTime() + 30 * 60 * 1000);
@@ -194,7 +197,7 @@ export default {
         date_time: dateTime.toISOString().slice(0, 19).replace('T', ' '),
         end_time: endTime.toISOString().slice(0, 19).replace('T', ' '),
         state_quotes: 'pendiente',
-        id_services: this.serviceIds
+        id_services: this.selectedServices[0].id_services
       };
 
       try {
@@ -208,7 +211,8 @@ export default {
             barber_name: this.barberName,
             date: this.selectedDate,
             time: this.selectedTime,
-            servicios: serviciosStr
+            servicios: serviciosStr,
+            id_services: this.selectedServices[0].id_services
           }
         });
       } catch (error) {
@@ -232,7 +236,6 @@ export default {
       try {
         const decodedServicios = decodeURIComponent(query.servicios);
         this.selectedServices = JSON.parse(decodedServicios);
-        this.serviceIds = this.selectedServices.map(s => s.id_services);
       } catch (e) {
         console.error('Error al parsear servicios:', e);
       }
@@ -245,6 +248,8 @@ export default {
   }
 };
 </script>
+
+
 
 <style scoped>
 body, .container {

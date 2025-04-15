@@ -25,15 +25,13 @@
           <p class="total">
             <strong>Total:</strong> ${{ totalServicios }}
           </p>
-          <button class="volver-btn" @click="guardarRelacion">Continuar</button>
+          <button class="volver-btn" @click="$router.push('/')">Volver al inicio</button>
         </div>
       </div>
     </div>
   </template>
   
   <script>
-  import { createTypeOfQuote } from '@/services/typeQuotesApi';
-  
   export default {
     name: 'FacturaServicios',
     data() {
@@ -44,36 +42,11 @@
         date: '',
         time: '',
         servicios: [],
-        quoteId: null, // id_quotes
       };
     },
     computed: {
       totalServicios() {
         return this.servicios.reduce((total, s) => total + parseFloat(s.price), 0);
-      }
-    },
-    methods: {
-      async guardarRelacion() {
-        if (!this.quoteId || !this.servicios.length || !this.barberId) {
-          alert('Faltan datos para guardar la relación.');
-          return;
-        }
-  
-        try {
-          for (const servicio of this.servicios) {
-            await createTypeOfQuote({
-              id_quotes: this.quoteId,
-              id_services: servicio.id_services,
-              barber_id: this.barberId
-            });
-          }
-  
-          alert('Cita registrada exitosamente.');
-          this.$router.push('/');
-        } catch (error) {
-          console.error('Error al guardar en type_of_quotes:', error);
-          alert('Hubo un problema al guardar los servicios relacionados.');
-        }
       }
     },
     mounted() {
@@ -83,7 +56,6 @@
       this.barberName = query.barber_name || '';
       this.date = query.date || '';
       this.time = query.time || '';
-      this.quoteId = parseInt(query.id_quotes); // <--- aquí lo tomamos
   
       if (query.servicios) {
         try {
@@ -95,7 +67,6 @@
     }
   };
   </script>
-  
   
   
   <style scoped>

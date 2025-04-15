@@ -6,7 +6,6 @@ const db = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const quoteRoutes = require('./routes/quotesRoutes');
-const typeOfQuotesRoutes = require('./routes/typeOfQuotesRoutes');
 
 const app = express();
 
@@ -23,7 +22,6 @@ const JWT_SECRET = 'W9mX7Pq2fG8kY6NvB3rH4tL5zA1J0CDE';
 app.use('/api/users', userRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/quotes', quoteRoutes);
-app.use('/api/type-of-quotes', typeOfQuotesRoutes);
 
 app.get('/api/', (req, res) => {
   res.send('API funcionando correctamente 🚀');
