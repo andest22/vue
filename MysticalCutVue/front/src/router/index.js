@@ -21,6 +21,10 @@ import Service from '../components/ServicesBarber.vue';
 import CrearServicios from '@/components/CrearServicios.vue';
 import EditarServicios from '@/components/EditarServicios.vue';
 import ServicesInactivos from '@/components/ServicesInactivos.vue';
+import ViewService from '@/components/ViewService.vue';
+import SeleccionarBarbero from '@/components/SeleccionarBarbero.vue';
+import CalendarioCitas from '@/components/CalendarioCitas.vue';
+import FacturaServicios from '@/components/FacturaServicios.vue';
 
 
 
@@ -49,6 +53,10 @@ const routes = [
   { path: '/Create-Services', component: CrearServicios , meta: { title: 'Crear Servicios | MysticalCut' } },
   { path: '/Editar-Services/:id', component: EditarServicios , meta: { title: 'Editar Servicios | MysticalCut' } },
   { path: '/Services-Inactivos', component: ServicesInactivos , meta: { title: 'Servicios inactivos| MysticalCut' } },
+  { path: '/View-Service/:id', component: ViewService , meta: { title: 'Ver Servicios | MysticalCut' } },
+  { path: '/Select-Barbero', component: SeleccionarBarbero , meta: { title: 'Seleccionar Barbero | MysticalCut' } },
+  { path: '/Calendario', component: CalendarioCitas , meta: { title: 'Calendario | MysticalCut' } },
+  { path: '/FacturaServicios', component: FacturaServicios , meta: { title: 'factura | MysticalCut' } },
 ];
 
 

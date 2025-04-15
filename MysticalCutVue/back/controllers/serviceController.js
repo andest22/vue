@@ -50,7 +50,9 @@ exports.getServiceById = (req, res) => {
 
 // 🔹 Crear un nuevo servicio
 exports.createService = (req, res) => {
-  const { name_service, description, estimated_time, price, id_category_services, id_status, image } = req.body;
+  const { name_service, description, estimated_time, price, id_category_services, id_status } = req.body;
+  const image = req.file ? req.file.filename : null;
+
   const query = `
     INSERT INTO services 
     (name_service, description, estimated_time, price, id_category_services, id_status, image) 
@@ -65,10 +67,13 @@ exports.createService = (req, res) => {
   });
 };
 
+
 // 🔹 Actualizar un servicio
 exports.updateService = (req, res) => {
   const { id } = req.params;
-  const { name_service, description, estimated_time, price, id_category_services, id_status, image } = req.body;
+  const { name_service, description, estimated_time, price, id_category_services, id_status } = req.body;
+  const image = req.file ? req.file.filename : null;
+
   const query = `
     UPDATE services 
     SET name_service = ?, description = ?, estimated_time = ?, price = ?, 
@@ -83,6 +88,7 @@ exports.updateService = (req, res) => {
     res.json({ message: 'Servicio actualizado correctamente' });
   });
 };
+
 
 // 🔹 Eliminar un servicio (cambiar estado a inactivo)
 exports.deleteService = (req, res) => {

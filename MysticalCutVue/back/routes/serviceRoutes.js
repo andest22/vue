@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const serviceController = require('../controllers/serviceController');
 const authenticateToken = require('../middlewares/authMiddleware');
+const upload = require('../middlewares/upload');
+
 
 // 🔹 Rutas específicas primero (más largas o con texto estático)
 
@@ -20,10 +22,10 @@ router.get('/', authenticateToken, serviceController.getAllServices);
 router.get('/:id', authenticateToken, serviceController.getServiceById);
 
 // Crear un nuevo servicio
-router.post('/', authenticateToken, serviceController.createService);
+router.post('/', authenticateToken, upload.single('image'), serviceController.createService);
 
 // Actualizar un servicio
-router.put('/:id', authenticateToken, serviceController.updateService);
+router.put('/:id', authenticateToken, upload.single('image'), serviceController.updateService);
 
 // Eliminar un servicio (cambiar estado a inactivo)
 router.delete('/:id', authenticateToken, serviceController.deleteService);

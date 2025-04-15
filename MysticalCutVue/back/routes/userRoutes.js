@@ -3,6 +3,8 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const authenticateToken = require('../middlewares/authMiddleware');
 
+
+
 // Rutas de autenticación
 router.post('/users/register', userController.registerUser);
 router.post('/login', userController.loginUser);
@@ -20,5 +22,10 @@ router.get('/inactives', authenticateToken, userController.getInactiveUsers);
 router.put('/users/:id', authenticateToken, userController.updateUser);
 router.put('/users/status/:id', authenticateToken, userController.updateUserStatus);
 router.delete('/users/:id', authenticateToken, userController.deleteUser);
+
+router.get('/barbers', authenticateToken, userController.getBarbers);
+router.post('/profile-by-email', authenticateToken, userController.getUserByEmail);
+
+
 
 module.exports = router;

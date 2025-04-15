@@ -366,6 +366,60 @@
             }
         };
         
+// 🔹 Obtener solo los barberos activos
+exports.getBarbers = (req, res) => {
+    const query = `
+        SELECT 
+            user_id, 
+            full_name, 
+            profile_image, 
+            user_email,
+            phone,
+            address,
+            role_fk 
+        FROM user 
+        WHERE role_fk = 2 AND userStatus_fk = 1;
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener los barberos:', err);
+            return res.status(500).json({ error: 'Error al obtener los barberos' });
+        }
+
+        res.json(results);
+    });
+};
+
+   
+
+exports.getUserByEmail = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'El correo es requerido' });
+  }
+
+  try {
+    const user = await User.findOne({
+      where: { email },
+      attributes: ['id', 'full_name', 'email', 'role_id'],
+      include: [{ model: RoleModule, as: 'modules' }]
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error al obtener el usuario por email:", error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+
+
 
 
 

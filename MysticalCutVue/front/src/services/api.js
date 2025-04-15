@@ -172,5 +172,30 @@ export const requestPasswordReset = async (email) => {
 };
 
 
+export const getBarbers = async () => {
+  try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/barbers`, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+          },
+      });
+      return response.data;
+  } catch (error) {
+      console.error("Error al obtener los barberos:", error);
+      throw error;
+  }
+};
+
+// 🔹 Obtener usuario por email (sin token)
+export const getUserByEmail = async (email) => {
+  try {
+    const response = await axios.post('http://localhost:5000/api/users/profile-by-email', { email });
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener el usuario por email:", error);
+    throw error;
+  }
+};
 
 
