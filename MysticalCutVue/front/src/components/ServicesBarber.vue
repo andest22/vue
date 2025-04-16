@@ -80,8 +80,7 @@
         <h4 class="mb-3">Servicios Seleccionados</h4>
         <ul class="list-unstyled">
           <li v-for="service in selectedServices" :key="service.id_services" class="mb-2">
-            <strong>{{ service.name_service }}</strong> - ${{ service.price }}
-            <button class="btn btn-sm btn-outline-danger ms-2" @click="removeSelected(service.id_services)">X</button>
+            <strong>{{ service.name_service }}</strong>
           </li>
         </ul>
         <p class="mt-3"><strong>Total:</strong> ${{ totalPrice }}</p>
@@ -151,7 +150,7 @@ const fetchUserData = async () => {
     });
     user.value = {
       full_name: data.full_name || 'Usuario',
-      user_id: data.user_id, // 🔄 Asegúrate de que en tu backend esto se devuelva
+      user_id: data.user_id,
       modules: data.modules || []
     };
     roleModules.value = user.value.modules;
@@ -184,13 +183,11 @@ const getCategoryId = (category) => category.toLowerCase().replace(/\s+/g, '-').
 const getServiceImage = (image) => image ? `/background/${image}` : '/img/background/combo01.png';
 
 const selectService = (service) => {
-  if (!selectedServices.value.find(s => s.id_services === service.id_services)) {
+  if (selectedServices.value.length) {
+    selectedServices.value = [service];
+  } else {
     selectedServices.value.push(service);
   }
-};
-
-const removeSelected = (id) => {
-  selectedServices.value = selectedServices.value.filter(s => s.id_services !== id);
 };
 
 const clearAllSelected = () => selectedServices.value = [];
@@ -239,25 +236,36 @@ const goBack = () => router.push('/Home');
 
 <style scoped>
 .category-nav {
-  margin: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #000000;
+  padding: 10px 0;
+  border-bottom: 1px solid #444;
 }
+
 .category-nav .nav-link {
   font-size: 1.1rem;
   font-weight: bold;
   color: gold;
   text-transform: uppercase;
 }
+
 .category-nav .nav-link:hover {
   color: white;
   text-decoration: underline;
 }
+
 .category-title {
   margin-top: 50px;
   padding-top: 20px;
   color: gold;
   font-size: 1.8rem;
 }
+
 .selected-service-box {
+  position: sticky;
+  top: 120px;
   max-width: 350px;
   min-width: 280px;
   border: 2px solid #444;
@@ -265,9 +273,25 @@ const goBack = () => router.push('/Home');
   background-color: #111;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
   align-self: flex-start;
+  z-index: 999;
 }
+
 .btn-regresar button {
   font-size: 1rem;
   padding: 10px 20px;
+}
+
+.service-image img {
+  border-radius: 10px;
+}
+
+.service-details .card-description {
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+.card-actions button {
+  font-size: 0.9rem;
+  padding: 5px 10px;
 }
 </style>

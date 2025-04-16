@@ -3,7 +3,7 @@ const db = require('../config/db');
 
 // 🔹 Crear una nueva cita
 exports.createQuote = (req, res) => {
-  const { user_id, barber_id, date_time, end_time, state_quotes } = req.body;
+  const { user_id, barber_id, date_time, end_time, state_quotes, id_services } = req.body;
 
   // Log completo para depurar los datos recibidos
   console.log('🟢 Datos recibidos en createQuote:', {
@@ -12,26 +12,28 @@ exports.createQuote = (req, res) => {
     date_time,
     end_time,
     state_quotes,
+    id_services,
   });
 
   // Validación de TODOS los campos
-  if (!user_id || !barber_id || !date_time || !end_time || !state_quotes) {
+  if (!user_id || !barber_id || !date_time || !end_time || !state_quotes || !id_services) {
     console.warn('⚠️ Faltan datos requeridos:', {
       user_id,
       barber_id,
       date_time,
       end_time,
       state_quotes,
+      id_services,
     });
     return res.status(400).json({ message: 'Faltan datos requeridos' });
   }
 
   const query = `
-    INSERT INTO quotes (user_id, barber_id, date_time, end_time, state_quotes)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO quotes (user_id, barber_id, date_time, end_time, state_quotes, id_services)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(query, [user_id, barber_id, date_time, end_time, state_quotes], (err, result) => {
+  db.query(query, [user_id, barber_id, date_time, end_time, state_quotes, id_services], (err, result) => {
     if (err) {
       console.error('🔴 Error al guardar la cita en DB:', err);
       return res.status(500).json({ message: 'Error al guardar la cita' });
@@ -53,8 +55,8 @@ exports.getQuotesByBarberAndMonth = (req, res) => {
   const query = `
     SELECT id_quotes, date_time, end_time
     FROM quotes
-    WHERE barber_id = ?
-      AND YEAR(date_time) = ?
+    WHERE barber_id = ? 
+      AND YEAR(date_time) = ? 
       AND MONTH(date_time) = ?
   `;
 
