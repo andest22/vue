@@ -25,6 +25,7 @@ import ViewService from '@/components/ViewService.vue';
 import SeleccionarBarbero from '@/components/SeleccionarBarbero.vue';
 import CalendarioCitas from '@/components/CalendarioCitas.vue';
 import FacturaServicios from '@/components/FacturaServicios.vue';
+import CitasPendientes from '@/components/CitasPendientes.vue';
 
 
 
@@ -57,6 +58,7 @@ const routes = [
   { path: '/Select-Barbero', component: SeleccionarBarbero , meta: { title: 'Seleccionar Barbero | MysticalCut' } },
   { path: '/Calendario', component: CalendarioCitas , meta: { title: 'Calendario | MysticalCut' } },
   { path: '/FacturaServicios', component: FacturaServicios , meta: { title: 'factura | MysticalCut' } },
+  { path: '/Citas', component: CitasPendientes , meta: { title: 'Citas | MysticalCut' } },
 ];
 
 

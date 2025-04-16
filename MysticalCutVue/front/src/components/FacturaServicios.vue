@@ -25,7 +25,7 @@
           <p class="total">
             <strong>Total:</strong> ${{ totalServicios }}
           </p>
-          <button class="volver-btn" @click="$router.push('/')">Volver al inicio</button>
+          <button class="volver-btn" @click="$router.push('/citas')">Volver al inicio</button>
         </div>
       </div>
     </div>

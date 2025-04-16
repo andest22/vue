@@ -9,4 +9,13 @@ router.post('/', authenticateToken, quotesController.createQuote);
 // 🔓 Obtener citas por barbero, año y mes (NO requiere token)
 router.get('/mes', quotesController.getQuotesByBarberAndMonth);
 
+// 🔒 Obtener citas con detalle de servicios por usuario (requiere token)
+router.get('/detalles', authenticateToken, quotesController.getQuotesWithServiceDetails);
+
+// Ruta para cancelar cita
+router.put('/cancel/:id', quotesController.cancelQuote);
+
+
+
+
 module.exports = router;

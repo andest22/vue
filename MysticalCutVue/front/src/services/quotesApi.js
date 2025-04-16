@@ -39,3 +39,30 @@ export const getQuotesByMonth = async (barberId, year, month) => {
     }
   };
   
+  // 🔹 Obtener citas con detalles de servicio por usuario
+export const getQuotesWithServiceDetails = async (userId) => {
+  try {
+    const response = await axios.get(`${QUOTES_API_URL}/detalles`, {
+      params: { user_id: userId },
+      ...getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener citas con detalles:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Función para cancelar una cita
+export const cancelQuote = async (quoteId) => {
+  try {
+    const response = await axios.put(`${QUOTES_API_URL}/cancel/${quoteId}`, {}, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error('Error al cancelar la cita:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+

@@ -76,3 +76,59 @@ exports.getQuotesByBarberAndMonth = (req, res) => {
     res.status(200).json(citas);
   });
 };
+
+// 🔹 Obtener citas con detalle de servicio por usuario
+// 🔹 Obtener citas con detalle de servicio
+exports.getQuotesWithServiceDetails = (req, res) => {
+  const { user_id } = req.query;
+
+  if (!user_id) {
+    return res.status(400).json({ message: 'Falta el parámetro user_id' });
+  }
+
+  const query = `
+    SELECT 
+      q.id_quotes,
+      q.date_time,
+      q.state_quotes,
+      s.id_services,
+      s.name_service,
+      s.price,
+      s.estimated_time
+    FROM quotes q
+    JOIN services s ON q.id_services = s.id_services
+    WHERE q.user_id = ?
+    ORDER BY q.date_time DESC
+  `;
+
+  db.query(query, [user_id], (err, results) => {
+    if (err) {
+      console.error('🔴 Error al obtener citas con detalles de servicio:', err);
+      return res.status(500).json({ message: 'Error al obtener citas' });
+    }
+
+    res.status(200).json(results);
+  });
+};
+
+// Función para cancelar una cita
+exports.cancelQuote = (req, res) => {
+  const quoteId = req.params.id;  // Asumiendo que el ID de la cita llega como parámetro en la URL
+
+  // Query para actualizar el estado de la cita a 'cancelada'
+  const query = 'UPDATE quotes SET state_quotes = ? WHERE id_quotes = ?';
+  
+  db.query(query, ['cancelada', quoteId], (err, result) => {
+    if (err) {
+      console.error("Error al cancelar cita:", err);
+      return res.status(500).json({ message: 'Error al cancelar la cita.' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Cita no encontrada.' });
+    }
+    res.status(200).json({ message: 'Cita cancelada con éxito.' });
+  });
+};
+
+
+
