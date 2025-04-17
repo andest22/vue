@@ -77,15 +77,17 @@ exports.getQuotesByBarberAndMonth = (req, res) => {
   });
 };
 
-// 🔹 Obtener citas con detalle de servicio por usuario
-// 🔹 Obtener citas con detalle de servicio
-exports.getQuotesWithServiceDetails = (req, res) => {
-  const { user_id } = req.query;
 
-  if (!user_id) {
-    return res.status(400).json({ message: 'Falta el parámetro user_id' });
+// 🔹 Obtener citas con detalle de servicio por usuario o barbero
+exports.getQuotesWithServiceDetails = (req, res) => {
+  const { user_id, barber_id } = req.query;
+
+  if (!user_id && !barber_id) {
+    return res.status(400).json({ message: 'Falta el parámetro user_id o barber_id' });
   }
 
+  // Si se pasa el user_id, obtenemos las citas para ese usuario.
+  // Si se pasa el barber_id, obtenemos las citas donde el barbero está asignado.
   const query = `
     SELECT 
       q.id_quotes,
@@ -94,22 +96,28 @@ exports.getQuotesWithServiceDetails = (req, res) => {
       s.id_services,
       s.name_service,
       s.price,
-      s.estimated_time
+      s.estimated_time,
+      q.barber_id,
+      u.full_name AS barber_name
     FROM quotes q
     JOIN services s ON q.id_services = s.id_services
-    WHERE q.user_id = ?
+    LEFT JOIN user u ON q.barber_id = u.user_id
+    WHERE (q.user_id = ? OR q.barber_id = ?)
     ORDER BY q.date_time DESC
   `;
 
-  db.query(query, [user_id], (err, results) => {
+  db.query(query, [user_id || barber_id, barber_id || user_id], (err, results) => {
     if (err) {
       console.error('🔴 Error al obtener citas con detalles de servicio:', err);
       return res.status(500).json({ message: 'Error al obtener citas' });
     }
 
+    console.log('📦 Resultados de citas con detalles:', results);
     res.status(200).json(results);
   });
 };
+
+
 
 // Función para cancelar una cita
 exports.cancelQuote = (req, res) => {
