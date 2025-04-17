@@ -140,3 +140,23 @@ exports.cancelQuote = (req, res) => {
 
 
 
+// Función para finalizar una cita
+exports.finishQuote = (req, res) => {
+  const quoteId = req.params.id;
+
+  // Query para actualizar el estado de la cita a 'finalizada'
+  const query = 'UPDATE quotes SET state_quotes = ? WHERE id_quotes = ?';
+
+  db.query(query, ['finalizada', quoteId], (err, result) => {
+    if (err) {
+      console.error("Error al finalizar la cita:", err);
+      return res.status(500).json({ message: 'Error al finalizar la cita.' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Cita no encontrada.' });
+    }
+    res.status(200).json({ message: 'Cita finalizada con éxito.' });
+  });
+};
+
+

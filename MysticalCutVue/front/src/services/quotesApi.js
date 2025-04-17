@@ -66,3 +66,13 @@ export const cancelQuote = async (quoteId) => {
 
 
 
+// Función para finalizar una cita
+export const finishQuote = async (quoteId) => {
+  try {
+    const response = await axios.put(`${QUOTES_API_URL}/finish/${quoteId}`, {}, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error('Error al finalizar la cita:', error.response?.data || error.message);
+    throw error;
+  }
+};
