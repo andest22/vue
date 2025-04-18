@@ -176,6 +176,12 @@ export default {
       }
     },
 
+    // Función para convertir el tiempo en formato hh:mm:ss a minutos
+    convertTimeToMinutes(time) {
+      const [hours, minutes] = time.split(':').map(Number);
+      return (hours * 60) + minutes;
+    },
+
     async confirmQuote() {
       if (!this.selectedDate || !this.selectedTime) {
         alert('Por favor selecciona fecha y hora.');
@@ -187,18 +193,56 @@ export default {
         return;
       }
 
+      // Aseguramos que la fecha y hora seleccionadas sean válidas
       const dateTimeStr = `${this.selectedDate}T${this.selectedTime}:00`;
       const dateTime = new Date(dateTimeStr);
-      const endTime = new Date(dateTime.getTime() + 30 * 60 * 1000);
+
+      // Verificamos que la fecha seleccionada sea válida
+      console.log("Fecha y hora de inicio:", dateTimeStr);
+      console.log("Objeto Date de inicio:", dateTime);
+
+      if (isNaN(dateTime.getTime())) {
+        alert('La fecha y hora seleccionadas no son válidas. Por favor, verifica los datos.');
+        return;
+      }
+
+      const estimatedTime = this.selectedServices[0].estimated_time || '00:30:00'; // en formato hh:mm:ss
+      console.log("Tiempo estimado del servicio:", estimatedTime); // Verificación del tiempo estimado
+
+      // Convertimos el tiempo estimado a minutos
+      const estimatedTimeInMinutes = this.convertTimeToMinutes(estimatedTime);
+      console.log("Tiempo estimado en minutos:", estimatedTimeInMinutes);
+
+      // Calculamos la hora de finalización sumando los minutos al tiempo de inicio
+      const endTime = new Date(dateTime);
+      console.log("Fecha de inicio antes de agregar minutos:", endTime);
+      endTime.setMinutes(endTime.getMinutes() + estimatedTimeInMinutes);  // Sumamos el tiempo estimado en minutos
+
+      // Verificamos que la hora de finalización sea válida
+      console.log("Hora de finalización calculada:", endTime);
+
+      if (isNaN(endTime.getTime())) {
+        alert('La hora de finalización calculada no es válida. Intenta nuevamente.');
+        return;
+      }
+
+      // Validamos que la hora de finalización sea posterior a la hora de inicio
+      if (endTime <= dateTime) {
+        alert('La hora de finalización no puede ser antes de la hora de inicio.');
+        return;
+      }
 
       const data = {
         user_id: this.userId,
         barber_id: this.barberId,
-        date_time: dateTime.toISOString().slice(0, 19).replace('T', ' '),
-        end_time: endTime.toISOString().slice(0, 19).replace('T', ' '),
+        date_time: dateTime.toISOString(), // formato ISO
+        end_time: endTime.toISOString(),   // formato ISO
         state_quotes: 'pendiente',
         id_services: this.selectedServices[0].id_services
       };
+
+      // Verificamos los datos que se están enviando
+      console.log("Datos de la cita que se van a enviar:", data);
 
       try {
         await createQuote(data);
@@ -251,6 +295,12 @@ export default {
 
 
 
+
+
+
+
+
+
 <style scoped>
 body, .container {
   background-color: #000;
@@ -295,123 +345,74 @@ h1 {
   flex: 1;
   border: 1px solid #ccc;
   padding: 20px;
-  background-color: #1a1a1a;
-  border-radius: 10px;
-  min-width: 250px;
-}
-
-.profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.profile-pic {
-  width: 40px;
-  height: 40px;
-  background-color: #aaa;
-  border-radius: 50%;
-}
-
-.calendar {
-  background-color: #1a1a1a;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  background-color: #222;
 }
 
 .calendar-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  color: #fff;
   margin-bottom: 10px;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-}
-
-.day-label {
-  text-align: center;
-  font-weight: bold;
-  color: #aaa;
+  gap: 10px;
 }
 
 .calendar-day {
-  background-color: #333;
   padding: 10px;
   text-align: center;
   cursor: pointer;
   border-radius: 5px;
-  color: #fff;
+  transition: background-color 0.3s ease;
 }
 
 .calendar-day:hover {
-  background-color: #555;
+  background-color: #444;
 }
 
-.calendar-day.selected {
-  background-color: #D4AF37;
-  color: #000;
-  font-weight: bold;
+.selected {
+  background-color: #f5c30f;
 }
 
-.calendar-day.empty {
+.empty {
   background-color: transparent;
-  cursor: default;
+}
+
+.disabled {
+  background-color: #666;
+  pointer-events: none;
 }
 
 .time-list {
-  max-height: 250px;
-  overflow-y: auto;
+  margin-top: 20px;
 }
 
 .time-button {
-  display: block;
-  width: 100%;
-  background-color: #D4AF37;
-  color: black;
   padding: 10px;
-  margin-bottom: 10px;
+  background-color: #444;
   border: none;
-  font-weight: bold;
-  border-radius: 6px;
+  margin: 5px 0;
   cursor: pointer;
+  width: 100%;
 }
 
 .time-button.selected {
-  border: 2px solid white;
+  background-color: #f5c30f;
 }
 
-.service-summary h3 {
-  color: #D4AF37;
-  margin-bottom: 15px;
-}
-
-.confirm-button,
-.back-button1 {
-  margin-top: 15px;
-  background-color: #D4AF37;
+.confirm-button, .back-button1 {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background-color: #f5c30f;
   color: #000;
   border: none;
-  padding: 10px 20px;
   cursor: pointer;
-  border-radius: 6px;
-  font-weight: bold;
-  width: 100%;
 }
 
-footer {
-  border-top: 1px solid #666;
-  margin-top: 20px;
-  padding-top: 10px;
-  text-align: center;
-  font-size: 14px;
-  color: #ccc;
+.back-button1 {
+  background-color: #ccc;
 }
 </style>

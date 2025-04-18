@@ -3,44 +3,64 @@ const db = require('../config/db');
 
 // 🔹 Crear una nueva cita
 exports.createQuote = (req, res) => {
-  const { user_id, barber_id, date_time, end_time, state_quotes, id_services } = req.body;
+  const { user_id, barber_id, date_time, state_quotes, id_services } = req.body;
 
-  // Log completo para depurar los datos recibidos
   console.log('🟢 Datos recibidos en createQuote:', {
     user_id,
     barber_id,
     date_time,
-    end_time,
     state_quotes,
     id_services,
   });
 
-  // Validación de TODOS los campos
-  if (!user_id || !barber_id || !date_time || !end_time || !state_quotes || !id_services) {
+  if (!user_id || !barber_id || !date_time || !state_quotes || !id_services) {
     console.warn('⚠️ Faltan datos requeridos:', {
       user_id,
       barber_id,
       date_time,
-      end_time,
       state_quotes,
       id_services,
     });
     return res.status(400).json({ message: 'Faltan datos requeridos' });
   }
 
-  const query = `
-    INSERT INTO quotes (user_id, barber_id, date_time, end_time, state_quotes, id_services)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
+  // Obtener el tiempo estimado del servicio
+  const getDurationQuery = `SELECT estimated_time FROM services WHERE id_services = ?`;
 
-  db.query(query, [user_id, barber_id, date_time, end_time, state_quotes, id_services], (err, result) => {
-    if (err) {
-      console.error('🔴 Error al guardar la cita en DB:', err);
-      return res.status(500).json({ message: 'Error al guardar la cita' });
+  db.query(getDurationQuery, [id_services], (err, results) => {
+    if (err || results.length === 0) {
+      console.error('🔴 Error al obtener duración del servicio:', err);
+      return res.status(500).json({ message: 'Error al obtener duración del servicio' });
     }
 
-    console.log('✅ Cita guardada con ID:', result.insertId);
-    res.status(201).json({ message: 'Cita creada correctamente', id: result.insertId });
+    const estimatedMinutes = results[0].estimated_time;
+
+    // Calcular end_time
+    const startTime = new Date(date_time);
+    const endTime = new Date(startTime.getTime() + estimatedMinutes * 60000);
+
+    const query = `
+      INSERT INTO quotes (user_id, barber_id, date_time, end_time, state_quotes, id_services)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(
+      query,
+      [user_id, barber_id, startTime, endTime, state_quotes, id_services],
+      (err, result) => {
+        if (err) {
+          console.error('🔴 Error al guardar la cita en DB:', err);
+          return res.status(500).json({ message: 'Error al guardar la cita' });
+        }
+
+        console.log('✅ Cita guardada con ID:', result.insertId);
+        res.status(201).json({
+          message: 'Cita creada correctamente',
+          id: result.insertId,
+          end_time: endTime,
+        });
+      }
+    );
   });
 };
 
