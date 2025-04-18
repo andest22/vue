@@ -176,7 +176,6 @@ export default {
       }
     },
 
-    // Función para convertir el tiempo en formato hh:mm:ss a minutos
     convertTimeToMinutes(time) {
       const [hours, minutes] = time.split(':').map(Number);
       return (hours * 60) + minutes;
@@ -193,41 +192,29 @@ export default {
         return;
       }
 
-      // Aseguramos que la fecha y hora seleccionadas sean válidas
       const dateTimeStr = `${this.selectedDate}T${this.selectedTime}:00`;
-      const dateTime = new Date(dateTimeStr);
+      const dateTime = new Date(dateTimeStr); // Usa la hora local
 
-      // Verificamos que la fecha seleccionada sea válida
-      console.log("Fecha y hora de inicio:", dateTimeStr);
-      console.log("Objeto Date de inicio:", dateTime);
+      // Convierte la hora de inicio a UTC
+      const dateTimeUTC = new Date(dateTime.toISOString());
 
-      if (isNaN(dateTime.getTime())) {
+      if (isNaN(dateTimeUTC.getTime())) {
         alert('La fecha y hora seleccionadas no son válidas. Por favor, verifica los datos.');
         return;
       }
 
-      const estimatedTime = this.selectedServices[0].estimated_time || '00:30:00'; // en formato hh:mm:ss
-      console.log("Tiempo estimado del servicio:", estimatedTime); // Verificación del tiempo estimado
-
-      // Convertimos el tiempo estimado a minutos
+      const estimatedTime = this.selectedServices[0].estimated_time || '00:30:00';
       const estimatedTimeInMinutes = this.convertTimeToMinutes(estimatedTime);
-      console.log("Tiempo estimado en minutos:", estimatedTimeInMinutes);
 
-      // Calculamos la hora de finalización sumando los minutos al tiempo de inicio
-      const endTime = new Date(dateTime);
-      console.log("Fecha de inicio antes de agregar minutos:", endTime);
-      endTime.setMinutes(endTime.getMinutes() + estimatedTimeInMinutes);  // Sumamos el tiempo estimado en minutos
-
-      // Verificamos que la hora de finalización sea válida
-      console.log("Hora de finalización calculada:", endTime);
+      const endTime = new Date(dateTimeUTC);
+      endTime.setMinutes(endTime.getMinutes() + estimatedTimeInMinutes);
 
       if (isNaN(endTime.getTime())) {
         alert('La hora de finalización calculada no es válida. Intenta nuevamente.');
         return;
       }
 
-      // Validamos que la hora de finalización sea posterior a la hora de inicio
-      if (endTime <= dateTime) {
+      if (endTime <= dateTimeUTC) {
         alert('La hora de finalización no puede ser antes de la hora de inicio.');
         return;
       }
@@ -235,14 +222,11 @@ export default {
       const data = {
         user_id: this.userId,
         barber_id: this.barberId,
-        date_time: dateTime.toISOString(), // formato ISO
-        end_time: endTime.toISOString(),   // formato ISO
+        date_time: dateTimeUTC.toISOString(),
+        end_time: endTime.toISOString(),
         state_quotes: 'pendiente',
         id_services: this.selectedServices[0].id_services
       };
-
-      // Verificamos los datos que se están enviando
-      console.log("Datos de la cita que se van a enviar:", data);
 
       try {
         await createQuote(data);

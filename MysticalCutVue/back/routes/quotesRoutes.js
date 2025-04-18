@@ -18,4 +18,6 @@ router.put('/cancel/:id', quotesController.cancelQuote);
 // Ruta para finalizar una cita
 router.put('/finish/:id', quotesController.finishQuote);
 
+
+
 module.exports = router;

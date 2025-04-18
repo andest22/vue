@@ -2,58 +2,43 @@
 const db = require('../config/db');
 
 // 🔹 Crear una nueva cita
-exports.createQuote = (req, res) => {
+exports.createQuote = async (req, res) => {
   const { user_id, barber_id, date_time, state_quotes, id_services } = req.body;
 
-  console.log('🟢 Datos recibidos en createQuote:', {
-    user_id,
-    barber_id,
-    date_time,
-    state_quotes,
-    id_services,
-  });
-
   if (!user_id || !barber_id || !date_time || !state_quotes || !id_services) {
-    console.warn('⚠️ Faltan datos requeridos:', {
-      user_id,
-      barber_id,
-      date_time,
-      state_quotes,
-      id_services,
-    });
     return res.status(400).json({ message: 'Faltan datos requeridos' });
   }
 
-  // Obtener el tiempo estimado del servicio
-  const getDurationQuery = `SELECT estimated_time FROM services WHERE id_services = ?`;
+  try {
+    // Obtener duración estimada del servicio
+    const [durationResult] = await new Promise((resolve, reject) => {
+      db.query('SELECT estimated_time FROM services WHERE id_services = ?', [id_services], (err, results) => {
+        if (err || results.length === 0) return reject(err || 'No se encontró el servicio');
+        resolve(results);
+      });
+    });
 
-  db.query(getDurationQuery, [id_services], (err, results) => {
-    if (err || results.length === 0) {
-      console.error('🔴 Error al obtener duración del servicio:', err);
-      return res.status(500).json({ message: 'Error al obtener duración del servicio' });
+    const estimatedTime = durationResult.estimated_time; // tiempo estimado en formato 'hh:mm:ss'
+    const [hours, minutes] = estimatedTime.split(':').map(Number);
+    const estimatedMinutes = (hours * 60) + minutes; // Convertimos a minutos
+
+    const startTime = new Date(date_time);
+    const endTime = new Date(startTime.getTime() + estimatedMinutes * 60000); // Calculamos la hora de finalización
+
+    // Verificar disponibilidad del barbero
+    const disponible = await verificarDisponibilidad(barber_id, startTime, endTime);
+    if (!disponible) {
+      return res.status(409).json({ message: 'El barbero ya tiene una cita en ese horario' });
     }
 
-    const estimatedMinutes = results[0].estimated_time;
-
-    // Calcular end_time
-    const startTime = new Date(date_time);
-    const endTime = new Date(startTime.getTime() + estimatedMinutes * 60000);
-
-    const query = `
-      INSERT INTO quotes (user_id, barber_id, date_time, end_time, state_quotes, id_services)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
+    // Insertar la nueva cita
     db.query(
-      query,
+      `INSERT INTO quotes (user_id, barber_id, date_time, end_time, state_quotes, id_services)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [user_id, barber_id, startTime, endTime, state_quotes, id_services],
       (err, result) => {
-        if (err) {
-          console.error('🔴 Error al guardar la cita en DB:', err);
-          return res.status(500).json({ message: 'Error al guardar la cita' });
-        }
+        if (err) return res.status(500).json({ message: 'Error al guardar la cita' });
 
-        console.log('✅ Cita guardada con ID:', result.insertId);
         res.status(201).json({
           message: 'Cita creada correctamente',
           id: result.insertId,
@@ -61,7 +46,10 @@ exports.createQuote = (req, res) => {
         });
       }
     );
-  });
+  } catch (error) {
+    console.error('🔴 Error en createQuote:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
 };
 
 // 🔹 Obtener citas por barbero, año y mes
@@ -97,7 +85,6 @@ exports.getQuotesByBarberAndMonth = (req, res) => {
   });
 };
 
-
 // 🔹 Obtener citas con detalle de servicio por usuario o barbero
 exports.getQuotesWithServiceDetails = (req, res) => {
   const { user_id, barber_id } = req.query;
@@ -106,8 +93,6 @@ exports.getQuotesWithServiceDetails = (req, res) => {
     return res.status(400).json({ message: 'Falta el parámetro user_id o barber_id' });
   }
 
-  // Si se pasa el user_id, obtenemos las citas para ese usuario.
-  // Si se pasa el barber_id, obtenemos las citas donde el barbero está asignado.
   const query = `
     SELECT 
       q.id_quotes,
@@ -132,20 +117,16 @@ exports.getQuotesWithServiceDetails = (req, res) => {
       return res.status(500).json({ message: 'Error al obtener citas' });
     }
 
-    console.log('📦 Resultados de citas con detalles:', results);
     res.status(200).json(results);
   });
 };
 
-
-
 // Función para cancelar una cita
 exports.cancelQuote = (req, res) => {
-  const quoteId = req.params.id;  // Asumiendo que el ID de la cita llega como parámetro en la URL
+  const quoteId = req.params.id;
 
-  // Query para actualizar el estado de la cita a 'cancelada'
   const query = 'UPDATE quotes SET state_quotes = ? WHERE id_quotes = ?';
-  
+
   db.query(query, ['cancelada', quoteId], (err, result) => {
     if (err) {
       console.error("Error al cancelar cita:", err);
@@ -158,13 +139,10 @@ exports.cancelQuote = (req, res) => {
   });
 };
 
-
-
 // Función para finalizar una cita
 exports.finishQuote = (req, res) => {
   const quoteId = req.params.id;
 
-  // Query para actualizar el estado de la cita a 'finalizada'
   const query = 'UPDATE quotes SET state_quotes = ? WHERE id_quotes = ?';
 
   db.query(query, ['finalizada', quoteId], (err, result) => {
@@ -179,4 +157,20 @@ exports.finishQuote = (req, res) => {
   });
 };
 
+// Función para verificar la disponibilidad del barbero
+async function verificarDisponibilidad(barberId, startTime, endTime) {
+  const query = `
+    SELECT * FROM quotes
+    WHERE barber_id = ? 
+      AND (date_time BETWEEN ? AND ? OR end_time BETWEEN ? AND ?)
+  `;
 
+  const result = await new Promise((resolve, reject) => {
+    db.query(query, [barberId, startTime, endTime, startTime, endTime], (err, results) => {
+      if (err) reject(err);
+      resolve(results);
+    });
+  });
+
+  return result.length === 0; // Si no hay citas en este rango, el barbero está disponible
+}
