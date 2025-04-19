@@ -2,9 +2,12 @@
   <div class="container">
       <header class="d-flex flex-wrap align-items-center justify-content-between py-3 mb-4 border-bottom">
       <!-- Logo a la izquierda -->
-      <div class="col-md-3 mb-2 mb-md-0 d-flex justify-content-start">
-        <img src="/img/background/LOGO.png" alt="Logo" width="125" height="125" class="d-inline-block align-text-top" />
-      </div>
+      <div class="col-md-3 mb-2 mb-md-0">
+  <router-link to="/Home">
+    <img src="/img/background/LOGO.png" alt="Logo" width="125" height="125" class="d-inline-block align-text-top" />
+  </router-link>
+</div>
+
 
       <!-- Título centrado -->
       <div class="col-md-6 text-center">

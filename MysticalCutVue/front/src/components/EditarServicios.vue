@@ -2,9 +2,12 @@
   <div class="container">
     <!-- Header -->
     <header class="d-flex flex-wrap align-items-center justify-content-between py-3 mb-4 border-bottom">
-      <div class="col-md-3">
-        <img src="/img/background/LOGO.png" alt="Logo" width="100" height="100" />
-      </div>
+      <div class="col-md-3 mb-2 mb-md-0">
+  <router-link to="/Home">
+    <img src="/img/background/LOGO.png" alt="Logo" width="125" height="125" class="d-inline-block align-text-top" />
+  </router-link>
+</div>
+
       <h1 class="text-center mx-auto title">Editar Servicio</h1>
     </header>
 
