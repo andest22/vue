@@ -3,10 +3,10 @@
     <!-- Encabezado -->
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
       <div class="col-md-3 mb-2 mb-md-0">
-        <img src="/assets/img/LOGO.png" alt="Logo" width="125" height="125" class="d-inline-block align-text-top" />
+        <img src="/img/background/LOGO.png" alt="Logo" width="125" height="125" class="d-inline-block align-text-top" />
       </div>
       <ul class="nav col-12 justify-content-center mx-auto">
-        <h1>Citas Pendientes</h1>
+        <h1>Citas</h1>
       </ul>
     </header>
 
@@ -20,7 +20,7 @@
             <th>Servicio</th>
             <th>Valor</th>
             <th>Estado</th>
-            <th>Acciones</th>
+            <th v-if="userRole === 'Employee'">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -30,7 +30,7 @@
             <td>{{ cita.name_service || 'Servicio no disponible' }}</td>
             <td>${{ cita.price ? cita.price.toLocaleString('es-CO') : 'N/A' }}</td>
             <td>{{ cita.state_quotes }}</td>
-            <td>
+            <td v-if="userRole === 'Employee'">
               <div class="d-flex gap-2">
                 <button
                   v-if="cita.state_quotes === 'pendiente'"
@@ -56,7 +56,7 @@
 
     <!-- Botón regresar -->
     <div class="text-center my-4">
-      <button class="btn btn-secondary" @click="$router.push('/Usuario')">Regresar</button>
+      <button class="btn btn-secondary" @click="$router.push('/Home')">Regresar</button>
     </div>
 
     <!-- Footer -->
@@ -76,6 +76,7 @@ export default {
     return {
       citas: [],
       userId: null,
+      userRole: null,
     };
   },
   methods: {
@@ -88,7 +89,6 @@ export default {
           return;
         }
 
-        // Obtener ID del usuario autenticado
         const { data: userData } = await axios.get('http://localhost:5000/api/users/profile', {
           headers: {
             Authorization: `Bearer ${token}`
@@ -96,10 +96,11 @@ export default {
         });
 
         this.userId = userData.user_id;
+        this.userRole = userData.role;
+        console.log("🧑‍💼 Usuario autenticado:", userData);
+        console.log("📋 Rol del usuario:", this.userRole);
 
-        // Obtener citas del usuario
         const citasData = await getQuotesWithServiceDetails(this.userId);
-        console.log("📌 Citas obtenidas:", citasData);
         this.citas = citasData;
       } catch (error) {
         console.error('❌ Error al cargar citas:', error);
@@ -113,9 +114,8 @@ export default {
     },
     async cancelarCita(id) {
       try {
-        const response = await cancelQuote(id);
-        console.log(response);
-        this.cargarCitas(); // Recargar citas
+        await cancelQuote(id);
+        this.cargarCitas();
         alert('Cita cancelada con éxito');
       } catch (error) {
         console.error('❌ Error al cancelar la cita:', error);
@@ -124,9 +124,8 @@ export default {
     },
     async finalizarCita(id) {
       try {
-        const response = await finishQuote(id);
-        console.log(response);
-        this.cargarCitas(); // Recargar citas
+        await finishQuote(id);
+        this.cargarCitas();
         alert('Cita finalizada con éxito');
       } catch (error) {
         console.error('❌ Error al finalizar la cita:', error);

@@ -76,3 +76,22 @@ export const finishQuote = async (quoteId) => {
     throw error;
   }
 };
+
+
+
+// 🔹 Obtener citas de un barbero en una fecha específica
+export const getQuotesByBarberAndDate = async (barberId, date) => {
+  try {
+    const response = await axios.get(QUOTES_API_URL, {
+      params: {
+        barber_id: barberId,
+        date
+      },
+      ...getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener citas por barbero y fecha:', error.response?.data || error.message);
+    throw error;
+  }
+};

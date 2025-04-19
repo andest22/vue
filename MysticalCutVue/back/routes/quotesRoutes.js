@@ -13,11 +13,12 @@ router.get('/mes', quotesController.getQuotesByBarberAndMonth);
 router.get('/detalles', authenticateToken, quotesController.getQuotesWithServiceDetails);
 
 // Ruta para cancelar cita
-router.put('/cancel/:id', quotesController.cancelQuote);
+router.put('/cancel/:id',authenticateToken, quotesController.cancelQuote);
 
 // Ruta para finalizar una cita
-router.put('/finish/:id', quotesController.finishQuote);
+router.put('/finish/:id',authenticateToken, quotesController.finishQuote);
 
 
+router.get('/quotes', quotesController.getQuotesByBarberAndDate);
 
 module.exports = router;

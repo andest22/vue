@@ -3,9 +3,9 @@
     <!-- Header -->
     <header class="d-flex flex-wrap align-items-center justify-content-between py-3 mb-4 border-bottom">
       <div class="col-md-3">
-        <img src="/img/background/LOGO.png" alt="Logo" width="125" height="125" />
+        <img src="/img/background/LOGO.png" alt="Logo" width="100" height="100" />
       </div>
-      <h1 class="text-center mx-auto">Crear Servicio</h1>
+      <h1 class="text-center mx-auto title">Crear Servicio</h1>
     </header>
 
     <!-- Main Content -->
@@ -13,15 +13,15 @@
       <!-- Imagen y Precio -->
       <div class="col-md-5 text-center">
         <div class="image-placeholder mx-auto mb-3">
-          <img :src="imagePreview || '/img/background/signointerrogacion.jpg'" alt="Preview" style="width: 100%; max-height: 250px; object-fit: cover;" />
+          <img :src="imagePreview || '/img/background/signointerrogacion.jpg'" alt="Preview" class="preview-image" />
         </div>
         <div class="mb-3">
           <label class="form-label">Imagen</label>
-          <input type="file" @change="handleImageUpload" class="form-control" />
+          <input type="file" @change="handleImageUpload" class="form-control custom-input" />
         </div>
         <div class="mb-3">
           <label class="form-label">Precio</label>
-          <input v-model="form.price" type="number" class="form-control" placeholder="Precio" required />
+          <input v-model="form.price" type="number" class="form-control custom-input" placeholder="Precio" required />
         </div>
       </div>
 
@@ -30,22 +30,22 @@
         <form @submit.prevent="handleSubmit" class="edit-form">
           <div class="mb-3">
             <label class="form-label">Nombre</label>
-            <input v-model="form.name_service" type="text" class="form-control" placeholder="Nombre del servicio" required />
+            <input v-model="form.name_service" type="text" class="form-control custom-input" placeholder="Nombre del servicio" required />
           </div>
 
           <div class="mb-3">
             <label class="form-label">Descripción</label>
-            <input v-model="form.description" type="text" class="form-control" placeholder="Descripción" required />
+            <input v-model="form.description" type="text" class="form-control custom-input" placeholder="Descripción" required />
           </div>
 
           <div class="mb-3">
             <label class="form-label">Tiempo estimado</label>
-            <input v-model="form.estimated_time" type="text" class="form-control" placeholder="00:30:00" required />
+            <input v-model="form.estimated_time" type="text" class="form-control custom-input" placeholder="00:30:00" required />
           </div>
 
           <div class="mb-3">
             <label class="form-label">Categoría</label>
-            <select v-model="form.id_category_services" class="form-select" required>
+            <select v-model="form.id_category_services" class="form-select custom-input" required>
               <option disabled value="">Seleccionar</option>
               <option value="1">Corte</option>
               <option value="2">Barba</option>
@@ -57,22 +57,25 @@
 
           <div class="mb-3">
             <label class="form-label">Estado</label>
-            <select v-model="form.id_status" class="form-select">
+            <select v-model="form.id_status" class="form-select custom-input">
               <option value="1">Activo</option>
               <option value="2">Inactivo</option>
             </select>
           </div>
 
-          <button type="submit" class="btn w-100" style="background-color: #FFD700; color: black;">
+          <button type="submit" class="btn w-100 btn-add">
             Agregar
           </button>
         </form>
       </div>
     </div>
 
-    <router-link to="/Services" class="btn btn-secondary btn-regresar">
-      Regresar
-    </router-link>
+    <!-- Botón Regresar -->
+    <div class="text-center mt-3">
+      <router-link to="/Services" class="btn btn-secondary btn-regresar">
+        Regresar
+      </router-link>
+    </div>
 
     <!-- Mensajes -->
     <div class="text-center mt-3">
@@ -167,38 +170,78 @@ export default {
 </script>
 
 <style scoped>
+
+
+
 .container {
-  padding: 20px;
+  padding: 10px; /* Aún más compacto */
+  font-size: 13px; /* Letra un poco más pequeña */
 }
 
-.image-placeholder img {
-  max-height: 300px;
+.image-placeholder {
+  width: 100%;
+  max-height: 170px; /* Imagen más pequeña */
+  border: 2px solid #ccaf54;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-.boton1,
-.boton2 {
-  padding: 10px 20px;
+.custom-input {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #ccaf54;
+  font-size: 13px;
+  padding: 6px 10px; /* Input más delgado */
+}
+
+.custom-input::placeholder {
+  color: #ccc;
+}
+
+.form-label {
+  color: #ccaf54;
+  font-size: 13px;
+}
+
+.title {
+  color: #ccaf54;
+  text-align: center;
+  font-size: 24px; /* Título más compacto */
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.btn-add {
+  background-color: #ccaf54;
+  color: black;
   border: none;
-  border-radius: 6px;
-  color: white;
+  padding: 8px 0; /* Botón más pequeño */
+  font-size: 13px;
   font-weight: bold;
   transition: background-color 0.3s ease;
 }
 
-.boton1 {
-  background-color: #007bff;
+.btn-add:hover {
+  background-color: #b3953f;
 }
 
-.boton1:hover {
-  background-color: #0056b3;
-}
-
-.boton2 {
+.btn-regresar {
+  margin-top: 12px;
   background-color: #6c757d;
+  color: white;
+  padding: 6px 14px; /* Botón más pequeño */
+  font-size: 13px;
 }
 
-.boton2:hover {
+.btn-regresar:hover {
   background-color: #5a6268;
 }
 </style>
+

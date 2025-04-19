@@ -58,7 +58,7 @@ const routes = [
   { path: '/Select-Barbero', component: SeleccionarBarbero , meta: { title: 'Seleccionar Barbero | MysticalCut' } },
   { path: '/Calendario', component: CalendarioCitas , meta: { title: 'Calendario | MysticalCut' } },
   { path: '/FacturaServicios', component: FacturaServicios , meta: { title: 'factura | MysticalCut' } },
-  { path: '/Citas', component: CitasPendientes , meta: { title: 'Citas | MysticalCut' } },
+  { path: '/Citas', component: CitasPendientes , meta: { title: 'Citas | MysticalCut', requiresAuth: true } }
 ];
 
 

@@ -174,3 +174,33 @@ async function verificarDisponibilidad(barberId, startTime, endTime) {
 
   return result.length === 0; // Si no hay citas en este rango, el barbero está disponible
 }
+
+
+
+
+exports.getQuotesByBarberAndDate = (req, res) => {
+  const { barber_id, date } = req.query;
+
+  if (!barber_id || !date) {
+    return res.status(400).json({ message: 'Faltan parámetros: barber_id o date' });
+  }
+
+  const startOfDay = `${date} 00:00:00`;
+  const endOfDay = `${date} 23:59:59`;
+
+  const query = `
+    SELECT id_quotes, date_time, end_time
+    FROM quotes
+    WHERE barber_id = ?
+      AND date_time BETWEEN ? AND ?
+  `;
+
+  db.query(query, [barber_id, startOfDay, endOfDay], (err, results) => {
+    if (err) {
+      console.error('🔴 Error al obtener citas del día:', err);
+      return res.status(500).json({ message: 'Error al obtener citas del día' });
+    }
+
+    res.status(200).json(results);
+  });
+};

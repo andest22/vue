@@ -36,13 +36,12 @@
       </ul>
     </div>
 
-    <!-- BOTONES SUPERIORES -->
-    <div class="d-flex justify-content-between align-items-center my-3">
+    <!-- BOTONES SUPERIORES (solo admin) -->
+    <div class="d-flex justify-content-between align-items-center my-3" v-if="userRole === 'Admin'">
       <router-link to="/Create-Services" class="btn btn-agregar">
         <img src="https://cdn-icons-png.flaticon.com/512/992/992651.png" style="width: 20px; height: 20px; margin-right: 5px;" />
         Agregar
       </router-link>
-
       <router-link to="/Services-Inactivos" class="btn btn-secondary">Servicios Inactivos</router-link>
     </div>
 
@@ -62,10 +61,10 @@
                     <h5 class="card-title">{{ service.name_service }}</h5>
                     <p class="card-description">{{ service.description }}</p>
                     <div class="card-actions mt-2">
-                      <router-link :to="`/View-Service/${service.id_services}`" class="btn btn-outline-primary me-2">Ver</router-link>
-                      <button class="btn btn-success me-2" @click="selectService(service)">Seleccionar</button>
-                      <router-link :to="`/Editar-Services/${service.id_services}`" class="btn btn-warning me-2">Editar</router-link>
-                      <button class="btn btn-danger" @click="confirmDelete(service.id_services)">Eliminar</button>
+                      <router-link :to="`/View-Service/${service.id_services}`" class="btn btn-view me-2">Ver</router-link>
+                      <button v-if="userRole === 'Client'" class="btn btn-select me-2" @click="selectService(service)">Seleccionar</button>
+                      <router-link v-if="userRole === 'Admin'" :to="`/Editar-Services/${service.id_services}`" class="btn btn-edit me-2">Editar</router-link>
+                      <button v-if="userRole === 'Admin'" class="btn btn-danger" @click="confirmDelete(service.id_services)">Eliminar</button>
                     </div>
                   </div>
                 </div>
@@ -75,8 +74,8 @@
         </div>
       </div>
 
-      <!-- SERVICIOS SELECCIONADOS -->
-      <div v-if="selectedServices.length" class="selected-service-box card text-white bg-dark p-4">
+      <!-- SERVICIOS SELECCIONADOS (solo cliente) -->
+      <div v-if="userRole === 'Client' && selectedServices.length" class="selected-service-box card text-white bg-dark p-4">
         <h4 class="mb-3">Servicios Seleccionados</h4>
         <ul class="list-unstyled">
           <li v-for="service in selectedServices" :key="service.id_services" class="mb-2">
@@ -116,31 +115,21 @@ const selectedServices = ref([]);
 const isMenuOpen = ref(false);
 const user = ref({ full_name: '', user_id: null });
 const roleModules = ref([]);
+const userRole = ref('');
 
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value;
-};
-
-const closeMenu = (event) => {
-  if (!event.target.closest('.dropdown')) isMenuOpen.value = false;
-};
-
-const logout = () => {
-  localStorage.removeItem('token');
-  router.push('/');
-};
-
+// Funciones
+const toggleMenu = () => isMenuOpen.value = !isMenuOpen.value;
+const closeMenu = (event) => { if (!event.target.closest('.dropdown')) isMenuOpen.value = false; };
+const logout = () => { localStorage.removeItem('token'); router.push('/'); };
 const goToProfile = () => router.push('/perfil');
+const goBack = () => router.push('/Home');
 
 onMounted(() => {
   fetchServices();
   fetchUserData();
   document.addEventListener('click', closeMenu);
 });
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeMenu);
-});
+onUnmounted(() => document.removeEventListener('click', closeMenu));
 
 const fetchUserData = async () => {
   try {
@@ -154,6 +143,7 @@ const fetchUserData = async () => {
       modules: data.modules || []
     };
     roleModules.value = user.value.modules;
+    userRole.value = data.role || '';
   } catch (err) {
     console.error("❌ Error al obtener el usuario:", err);
     alert("No se pudo obtener la información del usuario.");
@@ -181,30 +171,14 @@ const servicesByCategory = computed(() => {
 
 const getCategoryId = (category) => category.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 const getServiceImage = (image) => image ? `/background/${image}` : '/img/background/combo01.png';
-
-const selectService = (service) => {
-  if (selectedServices.value.length) {
-    selectedServices.value = [service];
-  } else {
-    selectedServices.value.push(service);
-  }
-};
-
+const selectService = (service) => { selectedServices.value = [service]; };
 const clearAllSelected = () => selectedServices.value = [];
 
-const totalPrice = computed(() => {
-  return selectedServices.value.reduce((sum, s) => sum + parseFloat(s.price || 0), 0).toFixed(2);
-});
+const totalPrice = computed(() => selectedServices.value.reduce((sum, s) => sum + parseFloat(s.price || 0), 0).toFixed(2));
 
 const confirmDelete = async (id) => {
-  if (!id) {
-    alert("ID de servicio inválido.");
-    return;
-  }
-
-  const confirmar = confirm('¿Estás seguro de eliminar este servicio?');
-  if (!confirmar) return;
-
+  if (!id) return alert("ID de servicio inválido.");
+  if (!confirm('¿Estás seguro de eliminar este servicio?')) return;
   try {
     await deleteService(id);
     alert("✅ Servicio eliminado correctamente.");
@@ -216,11 +190,7 @@ const confirmDelete = async (id) => {
 };
 
 const goToSelectBarbero = () => {
-  if (!user.value.user_id) {
-    alert("No se ha podido obtener el ID del usuario.");
-    return;
-  }
-
+  if (!user.value.user_id) return alert("No se ha podido obtener el ID del usuario.");
   router.push({
     path: '/Select-Barbero',
     query: {
@@ -230,36 +200,38 @@ const goToSelectBarbero = () => {
     }
   });
 };
-
-const goBack = () => router.push('/Home');
 </script>
 
 <style scoped>
 .category-nav {
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 100; /* Bajar el z-index de la barra de categorías */
   background-color: #000000;
   padding: 10px 0;
   border-bottom: 1px solid #444;
 }
 
+.col-md-3.text-end .dropdown {
+  z-index: 200; /* Aumentar el z-index del dropdown para que esté por encima de las categorías */
+}
+
 .category-nav .nav-link {
   font-size: 1.1rem;
   font-weight: bold;
-  color: gold;
+  color: #CCAF54;
   text-transform: uppercase;
 }
 
 .category-nav .nav-link:hover {
-  color: white;
+  color: #FFD700;
   text-decoration: underline;
 }
 
 .category-title {
   margin-top: 50px;
   padding-top: 20px;
-  color: gold;
+  color: #CCAF54;
   font-size: 1.8rem;
 }
 
@@ -271,7 +243,7 @@ const goBack = () => router.push('/Home');
   border: 2px solid #444;
   border-radius: 12px;
   background-color: #111;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 10px rgba(204, 175, 84, 0.3);
   align-self: flex-start;
   z-index: 999;
 }
@@ -293,5 +265,41 @@ const goBack = () => router.push('/Home');
 .card-actions button {
   font-size: 0.9rem;
   padding: 5px 10px;
+}
+
+.btn-view {
+  background-color: #CCAF54;
+  color: #000;
+  border: none;
+  font-weight: bold;
+}
+
+.btn-view:hover {
+  background-color: #FFD700;
+  color: #fff;
+}
+
+.btn-select {
+  background-color: #CCAF54;
+  color: #000;
+  border: none;
+  font-weight: bold;
+}
+
+.btn-select:hover {
+  background-color: #FFD700;
+  color: #fff;
+}
+
+.btn-edit {
+  background-color: #CCAF54;
+  color: #000;
+  border: none;
+  font-weight: bold;
+}
+
+.btn-edit:hover {
+  background-color: #FFD700;
+  color: #fff;
 }
 </style>

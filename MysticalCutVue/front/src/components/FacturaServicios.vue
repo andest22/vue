@@ -1,154 +1,181 @@
 <template>
-    <div class="factura-container">
-      <header class="custom-header">
-        <img src="/assets/img/LOGO.png" alt="Logo" class="logo" />
-        <h1>Resumen de la Cita</h1>
-      </header>
-  
-      <div class="factura-content">
+  <div class="factura-container">
+    <div class="factura-content">
+      <div class="factura-wrapper">
+        <p class="mini-title">MysticalCut</p>
+        <h1 class="resumen-title">Resumen Servicio</h1>
         <div class="factura-box">
-          <h2>Detalles de la Cita</h2>
-          <p><strong>Cliente ID:</strong> {{ userId }}</p>
-          <p><strong>Barbero:</strong> {{ barberName }} (ID: {{ barberId }})</p>
-          <p><strong>Fecha:</strong> {{ date }}</p>
-          <p><strong>Hora:</strong> {{ time }}</p>
-  
-          <div v-if="servicios.length">
-            <h3>Servicios Seleccionados:</h3>
-            <ul>
-              <li v-for="(servicio, index) in servicios" :key="index">
-                {{ servicio.name_service }} - ${{ servicio.price }}
-              </li>
-            </ul>
+          <h2 class="orden-title">Orden de Servicio</h2>
+
+          <div class="fila-dato">
+            <span class="etiqueta">Servicio Seleccionado:</span>
+            <span class="valor">{{ servicioSeleccionado.name_service }}</span>
           </div>
-  
-          <p class="total">
-            <strong>Total:</strong> ${{ totalServicios }}
-          </p>
-          <button class="volver-btn" @click="$router.push('/citas')">Volver al inicio</button>
+
+          <div class="fila-dato">
+            <span class="etiqueta">Fecha:</span>
+            <span class="valor">{{ date }}</span>
+          </div>
+
+          <div class="fila-dato">
+            <span class="etiqueta">Hora:</span>
+            <span class="valor">{{ time }}</span>
+          </div>
+
+          <div class="fila-dato total">
+            <span class="etiqueta"><strong>Total:</strong></span>
+            <span class="valor"><strong>${{ totalServicios }}</strong></span>
+          </div>
+
+          <button class="volver-btn" @click="$router.push('/citas')">Ver Citas</button>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    name: 'FacturaServicios',
-    data() {
-      return {
-        userId: null,
-        barberId: null,
-        barberName: '',
-        date: '',
-        time: '',
-        servicios: [],
-      };
-    },
-    computed: {
-      totalServicios() {
-        return this.servicios.reduce((total, s) => total + parseFloat(s.price), 0);
-      }
-    },
-    mounted() {
-      const query = this.$route.query;
-      this.userId = parseInt(query.user_id);
-      this.barberId = parseInt(query.barber_id);
-      this.barberName = query.barber_name || '';
-      this.date = query.date || '';
-      this.time = query.time || '';
-  
-      if (query.servicios) {
-        try {
-          this.servicios = JSON.parse(decodeURIComponent(query.servicios));
-        } catch (e) {
-          console.error('Error al parsear servicios:', e);
-        }
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'FacturaServicios',
+  data() {
+    return {
+      userId: null,
+      barberId: null,
+      barberName: '',
+      date: '',
+      time: '',
+      servicioSeleccionado: {},
+    };
+  },
+  computed: {
+    totalServicios() {
+      return this.servicioSeleccionado.price || 0;
+    }
+  },
+  mounted() {
+    const query = this.$route.query;
+    this.userId = parseInt(query.user_id);
+    this.barberId = parseInt(query.barber_id);
+    this.barberName = query.barber_name || '';
+    this.date = query.date || '';
+    this.time = query.time || '';
+
+    if (query.servicios) {
+      try {
+        const servicios = JSON.parse(decodeURIComponent(query.servicios));
+        this.servicioSeleccionado = servicios[0] || {};
+      } catch (e) {
+        console.error('Error al parsear servicios:', e);
       }
     }
-  };
-  </script>
-  
-  
-  <style scoped>
-  .factura-container {
-    background-color: #000;
-    color: #fff;
-    font-family: 'Georgia', serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
-  
-  .custom-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid #666;
-    padding: 10px 0;
-    position: relative;
-    width: 100%;
-  }
-  
-  .logo {
-    width: 90px;
-    height: auto;
-    position: absolute;
-    left: 20px;
-  }
-  
-  h1 {
-    font-size: 28px;
-    color: #fff;
-  }
-  
-  .factura-content {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: start;
-    padding: 30px;
-    width: 100%;
-  }
-  
-  .factura-box {
-    background-color: #1a1a1a;
-    padding: 30px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 600px;
-    border: 1px solid #ccc;
-  }
-  
-  .factura-box h2,
-  .factura-box h3 {
-    color: #D4AF37;
-    margin-bottom: 10px;
-  }
-  
-  .factura-box p,
-  .factura-box li {
-    font-size: 16px;
-    margin: 5px 0;
-  }
-  
-  .total {
-    margin-top: 15px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #D4AF37;
-  }
-  
-  .volver-btn {
-    margin-top: 20px;
-    background-color: #D4AF37;
-    color: #000;
-    border: none;
-    padding: 12px 20px;
-    cursor: pointer;
-    border-radius: 6px;
-    font-weight: bold;
-    width: 100%;
-  }
-  </style>
-  
+};
+</script>
+
+<style scoped>
+@font-face {
+  font-family: 'Amasis_MT_Std_Black';
+  src: url('@/assets/fonts/Amasis_MT_Std_Black/Amasis_MT_Std_Black.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.factura-container {
+  background-color: #000;
+  color: #fff;
+  font-family: 'Amasis_MT_Std_Black', serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.factura-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  width: 100%;
+}
+
+.factura-wrapper {
+  background-color: #111;
+  padding: 50px;
+  border-radius: 20px;
+  border: 1px solid #555;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  width: 95%;
+  max-width: 650px;
+}
+
+.mini-title {
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 5px;
+  letter-spacing: 1px;
+  font-weight: bold;
+  opacity: 0.9;
+}
+
+.resumen-title {
+  color: #fff;
+  font-size: 36px;
+  margin-bottom: 35px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.factura-box {
+  background-color: #1a1a1a;
+  padding: 40px;
+  border-radius: 16px;
+  border: 1px solid #ccc;
+  min-height: 600px;
+}
+
+.orden-title {
+  text-align: center;
+  font-size: 26px;
+  color: #D4AF37;
+  margin-bottom: 40px;
+}
+
+.fila-dato {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+  font-size: 20px;
+  line-height: 1.8;
+}
+
+.etiqueta {
+  color: #bbb;
+  font-weight: 600;
+}
+
+.valor {
+  color: #fff;
+  font-weight: normal;
+}
+
+.total {
+  margin-top: 50px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #D4AF37;
+}
+
+.volver-btn {
+  margin-top: 40px;
+  background-color: #D4AF37;
+  color: #000;
+  border: none;
+  padding: 16px 26px;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
+  width: 100%;
+}
+</style>

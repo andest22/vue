@@ -21,7 +21,10 @@
               <h5 class="info-title">Descripción</h5>
               <p class="info-text">{{ service.description }}</p>
             </div>
-            
+            <div class="info-row">
+              <h5 class="info-title">Precio</h5>
+              <p class="info-text">\${{ parseFloat(service.price).toFixed(2) }}</p>
+            </div>
           </div>
           <button class="activate-btn" @click="activateServiceHandler(service)">Activar</button>
         </div>
@@ -83,15 +86,15 @@ onMounted(loadInactiveServices);
 }
 .pedido-box {
   display: flex;
-  align-items: center; /* Centra el contenido verticalmente */
-  justify-content: space-between; /* Espacia el contenido */
+  align-items: center;
+  justify-content: space-between;
   padding: 20px;
 }
 .service-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centra horizontalmente */
+  align-items: center;
   text-align: center;
 }
 .info-row {
@@ -112,8 +115,8 @@ onMounted(loadInactiveServices);
   color: #ffffff;
 }
 .back-button {
-  background-color: #444; /* Color de fondo oscuro */
-  color: #fff; /* Texto en blanco */
+  background-color: #444;
+  color: #fff;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
@@ -123,6 +126,6 @@ onMounted(loadInactiveServices);
   transition: background-color 0.3s ease;
 }
 .back-button:hover {
-  background-color: #666; /* Color más claro al pasar el mouse */
+  background-color: #666;
 }
 </style>

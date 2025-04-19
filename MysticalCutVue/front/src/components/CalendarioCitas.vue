@@ -1,15 +1,25 @@
 <template>
   <div class="container">
-    <header class="custom-header">
-      <img src="/assets/img/LOGO.png" alt="Logo" class="logo" />
-      <h1>Seleccionar Fecha y Hora</h1>
+      <header class="d-flex flex-wrap align-items-center justify-content-between py-3 mb-4 border-bottom">
+      <!-- Logo a la izquierda -->
+      <div class="col-md-3 mb-2 mb-md-0 d-flex justify-content-start">
+        <img src="/img/background/LOGO.png" alt="Logo" width="125" height="125" class="d-inline-block align-text-top" />
+      </div>
+
+      <!-- Título centrado -->
+      <div class="col-md-6 text-center">
+        <h2 class="text-uppercase m-0" style="color: white;">Seleccionar Fecha y Hora</h2>
+      </div>
+
+      <!-- Espacio a la derecha vacío para mantener simetría -->
+      <div class="col-md-3"></div>
     </header>
 
     <div class="main-content">
       <div class="left-column">
         <div class="profile">
           <div class="profile-pic"></div>
-          <span>{{ barberName }}</span>
+          <span class="barber-name">Barbero: {{ barberName }}</span>
         </div>
 
         <div class="calendar">
@@ -37,15 +47,17 @@
         </div>
 
         <div class="time-list">
-          <button
-            v-for="time in availableTimes"
-            :key="time"
-            @click="selectTime(time)"
-            :class="['time-button', { selected: selectedTime === formatTimeTo24H(time) }]"
-          >
-            {{ time }}
-          </button>
-        </div>
+  <div class="time-scroll">
+    <button
+      v-for="time in availableTimes"
+      :key="time"
+      @click="selectTime(time)"
+      :class="['time-button', { selected: selectedTime === formatTimeTo24H(time) }]">
+      {{ time }}
+    </button>
+  </div>
+</div>
+
       </div>
 
       <div class="right-column">
@@ -97,7 +109,7 @@ export default {
       availableTimes: [
         '8:00 a.m.', '9:00 a.m.', '10:00 a.m.', '11:00 a.m.',
         '12:00 p.m.', '1:00 p.m.', '2:00 p.m.', '3:00 p.m.',
-        '4:00 p.m.', '5:00 p.m.'
+        '4:00 p.m.', '5:00 p.m.', '6:00 p.m.', '7:00 p.m.', '8:00 p.m.'
       ],
       daysOfWeek: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
       monthNames: [
@@ -286,10 +298,27 @@ export default {
 
 
 <style scoped>
+@font-face {
+  font-family: 'Amasis_MT_Std_Black';
+  src: url('@/assets/fonts/Amasis_MT_Std_Black/Amasis_MT_Std_Black.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body, .container {
   background-color: #000;
   color: #fff;
-  font-family: 'Georgia', serif;
+  font-family: 'Amasis_MT_Std_Black', serif;
+}
+
+header {
+  background-color: #000;
+  color: white;
+}
+
+h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
 }
 
 .custom-header {
@@ -327,76 +356,188 @@ h1 {
 
 .right-column {
   flex: 1;
-  border: 1px solid #ccc;
+  max-width: 350px;
   padding: 20px;
   background-color: #222;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  align-self: flex-start;
+}
+
+/* Calendario mejorado */
+.calendar {
+  background-color: #111;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  margin-top: 20px;
 }
 
 .calendar-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  align-items: center;
+  background-color: #222;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  color: #f5c30f;
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+}
+
+.calendar-header button {
+  background-color: #333;
+  border: none;
+  color: #f5c30f;
+  font-size: 1.2rem;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.calendar-header button:hover {
+  background-color: #444;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
+  gap: 8px;
+}
+
+.day-label {
+  text-align: center;
+  font-weight: bold;
+  color: #f5c30f;
+  margin-bottom: 5px;
 }
 
 .calendar-day {
-  padding: 10px;
+  background-color: #1e1e1e;
+  color: #fff;
+  padding: 12px 0;
   text-align: center;
+  border-radius: 8px;
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  border: 1px solid transparent;
 }
 
 .calendar-day:hover {
-  background-color: #444;
+  background-color: #333;
+  transform: scale(1.05);
 }
 
-.selected {
+.calendar-day.selected {
   background-color: #f5c30f;
+  color: #000;
 }
 
-.empty {
+.calendar-day.disabled {
+  background-color: #444;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.calendar-day.empty {
   background-color: transparent;
-}
-
-.disabled {
-  background-color: #666;
+  border: none;
   pointer-events: none;
 }
 
+/* Lista de horas mejorada */
 .time-list {
-  margin-top: 20px;
+  margin-top: 30px;
+  background-color: #111;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #333;
+}
+
+.time-scroll {
+  max-height: 220px; /* Ajusta el tamaño según lo que necesites */
+  overflow-y: auto;
 }
 
 .time-button {
-  padding: 10px;
-  background-color: #444;
-  border: none;
-  margin: 5px 0;
+  padding: 12px;
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  margin: 8px 0;
   cursor: pointer;
   width: 100%;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.time-button:hover {
+  background-color: #333;
+  transform: translateY(-2px);
 }
 
 .time-button.selected {
   background-color: #f5c30f;
+  color: #000;
 }
 
-.confirm-button, .back-button1 {
+/* Botones de acción */
+.confirm-button,
+.back-button1 {
   margin-top: 20px;
   width: 100%;
   padding: 10px;
-  background-color: #f5c30f;
-  color: #000;
   border: none;
   cursor: pointer;
+  border-radius: 8px;
+  font-family: 'Amasis_MT_Std_Black', serif;
+}
+
+.confirm-button {
+  background-color: #f5c30f;
+  color: #000;
 }
 
 .back-button1 {
-  background-color: #ccc;
+  background-color: #908f8f;
+  color: #000;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  display: block;
+  margin: 20px auto 0;
+  width: fit-content;
 }
+
+.barber-name {
+  display: block;
+  margin-top: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #f5c30f;
+  font-family: 'Amasis_MT_Std_Black', serif;
+  text-align: left; /* <-- Alineado a la izquierda */
+  padding-left: 10px; /* Opcional: espacio desde el borde izquierdo */
+}
+
+footer {
+  background-color: #000;
+  color: #fff;
+  padding: 20px 0; /* Espacio superior e inferior */
+  text-align: center; /* Centra el texto */
+  font-size: 1rem; /* Tamaño de fuente */
+}
+
+footer p {
+  margin: 0; /* Elimina márgenes por defecto */
+}
+
+
 </style>
+
+

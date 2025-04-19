@@ -102,8 +102,8 @@ const goBack = () => {
   router.push('/Home');
 };
 
+// 🔹 Función para redirigir a la página de Citas
 const goMisCitas = () => {
-  router.push('/Home');
+  router.push('/Citas'); // Redirige a la ruta '/Citas'
 };
-
 </script>
