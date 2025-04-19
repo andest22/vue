@@ -1,5 +1,60 @@
 // controllers/quotesController.js
 const db = require('../config/db');
+const nodemailer = require('nodemailer');
+
+// 🔹 Enviar correo con detalles de la cita
+exports.sendQuoteEmail = async (req, res) => {
+  const { email, servicio, fecha, hora, total } = req.body;
+
+  if (!email || !servicio || !fecha || !hora || !total) {
+    return res.status(400).json({ message: 'Faltan datos del correo' });
+  }
+
+  try {
+    console.log('📤 Datos para enviar correo:', { email, servicio, fecha, hora, total });
+
+    // Configuración del transporte
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'kevinsabogal24@gmail.com',  // Asegúrate de que sea correcto
+        pass: 'wwqc rxvl xmqi mocs', // Considera usar una contraseña de aplicación si tienes 2FA habilitado
+      },
+    });
+
+    // Contenido del correo
+    const mailOptions = {
+      from: 'kevinsabogal24@gmail.com',
+      to: email,
+      subject: 'Confirmación de tu cita - MysticalCut',
+      html: `
+        <h2>💥💈Gracias por confiar en MysticalCut💈💥</h2>
+        <h2>💈Aqui tienes el resumen de tu cita 😉💈</h2>
+        <p><strong>Servicio:</strong> ${servicio}</p>
+        <p><strong>Fecha:</strong> ${fecha}</p>
+        <p><strong>Hora:</strong> ${hora}</p>
+        <p><strong>Total:</strong> $${total}</p>
+        <br>
+        <p>💈Te brindamos estilo y confianza en cada corte💈</p>
+      `,
+    };
+
+    // Enviar el correo
+    await transporter.sendMail(mailOptions);
+
+    console.log('✅ Correo enviado exitosamente a:', email);
+
+    res.status(200).json({ message: 'Correo enviado exitosamente' });
+  } catch (error) {
+    console.error('🔴 Error al enviar correo:', error);
+    res.status(500).json({ message: 'Error al enviar el correo' });
+  }
+};
+
+
+
+
+
 
 // 🔹 Crear una nueva cita
 exports.createQuote = async (req, res) => {

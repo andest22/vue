@@ -9,17 +9,22 @@
 
           <div class="fila-dato">
             <span class="etiqueta">Servicio Seleccionado:</span>
-            <span class="valor">{{ servicioSeleccionado.name_service }}</span>
+            <span class="valor">{{ servicioSeleccionado.name_service || 'No disponible' }}</span>
           </div>
 
           <div class="fila-dato">
             <span class="etiqueta">Fecha:</span>
-            <span class="valor">{{ date }}</span>
+            <span class="valor">{{ date || 'No disponible' }}</span>
           </div>
 
           <div class="fila-dato">
             <span class="etiqueta">Hora:</span>
-            <span class="valor">{{ time }}</span>
+            <span class="valor">{{ time || 'No disponible' }}</span>
+          </div>
+
+          <div class="fila-dato">
+            <span class="etiqueta">Correo del Cliente:</span>
+            <span class="valor">{{ userEmail || 'No disponible' }}</span>
           </div>
 
           <div class="fila-dato total">
@@ -27,7 +32,8 @@
             <span class="valor"><strong>${{ totalServicios }}</strong></span>
           </div>
 
-          <button class="volver-btn" @click="$router.push('/citas')">Ver Citas</button>
+          <!-- Solo el botón de "Ver Citas" que enviará el correo y redirigirá -->
+          <button class="volver-btn" @click="verCitas">Ver Citas</button>
         </div>
       </div>
     </div>
@@ -35,6 +41,8 @@
 </template>
 
 <script>
+import { sendQuoteEmail } from '@/services/quotesApi';
+
 export default {
   name: 'FacturaServicios',
   data() {
@@ -45,6 +53,7 @@ export default {
       date: '',
       time: '',
       servicioSeleccionado: {},
+      userEmail: '',
     };
   },
   computed: {
@@ -60,6 +69,12 @@ export default {
     this.date = query.date || '';
     this.time = query.time || '';
 
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      this.userEmail = user.email || '';
+    }
+
     if (query.servicios) {
       try {
         const servicios = JSON.parse(decodeURIComponent(query.servicios));
@@ -67,6 +82,42 @@ export default {
       } catch (e) {
         console.error('Error al parsear servicios:', e);
       }
+    }
+  },
+  methods: {
+    async enviarCorreo() {
+      try {
+        if (!this.userEmail) {
+          console.warn('No se puede enviar correo: email no definido');
+          return;
+        }
+
+        console.log('📤 Enviando correo a:', this.userEmail);
+        const response = await sendQuoteEmail({
+          email: this.userEmail,
+          servicio: this.servicioSeleccionado.name_service,
+          fecha: this.date,
+          hora: this.time,
+          total: this.totalServicios
+        });
+
+        if (response.message === 'Correo enviado exitosamente') {
+          console.log('✅ Correo enviado correctamente');
+          alert('Correo de confirmación enviado.');
+        } else {
+          alert('Error al enviar el correo.');
+        }
+      } catch (error) {
+        console.error('❌ Error al enviar correo:', error);
+        alert('Ocurrió un error al enviar el correo. Intenta nuevamente.');
+      }
+    },
+    // Método para redirigir a la vista de citas después de enviar el correo
+    verCitas() {
+      this.enviarCorreo().then(() => {
+        // Después de enviar el correo, redirigimos a la vista de citas
+        this.$router.push('/citas');
+      });
     }
   }
 };
@@ -177,5 +228,22 @@ export default {
   border-radius: 8px;
   font-weight: bold;
   width: 100%;
+}
+
+.correo-btn {
+  margin-top: 30px;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  padding: 12px 22px;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.correo-btn:hover {
+  background-color: #666;
 }
 </style>

@@ -3,6 +3,7 @@ const router = express.Router();
 const quotesController = require('../controllers/quotesController');
 const authenticateToken = require('../middlewares/authMiddleware');
 
+
 // 🔒 Crear una nueva cita (requiere token)
 router.post('/', authenticateToken, quotesController.createQuote);
 
@@ -20,5 +21,8 @@ router.put('/finish/:id',authenticateToken, quotesController.finishQuote);
 
 
 router.get('/quotes', quotesController.getQuotesByBarberAndDate);
+
+
+router.post('/send-email', quotesController.sendQuoteEmail);
 
 module.exports = router;

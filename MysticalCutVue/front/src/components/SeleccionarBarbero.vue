@@ -3,10 +3,10 @@
     <!-- Encabezado -->
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
       <div class="col-md-3 mb-2 mb-md-0">
-  <router-link to="/Home">
-    <img src="/img/background/LOGO.png" alt="Logo" width="125" height="125" class="d-inline-block align-text-top" />
-  </router-link>
-</div>
+        <router-link to="/Home">
+          <img src="/img/background/LOGO.png" alt="Logo" width="125" height="125" class="d-inline-block align-text-top" />
+        </router-link>
+      </div>
 
       <ul class="nav col-12 justify-content-center mx-auto">
         <h1>Elegir Barbero</h1>
@@ -21,9 +21,14 @@
         <div class="row">
           <div class="col-md-4 mb-3" v-for="barber in barbers" :key="barber.id">
             <div class="barber-card" :class="{ selected: selectedBarber && selectedBarber.id === barber.id }" @click="selectBarber(barber)">
-              <img :src="getImageUrl(barber.image)" :alt="barber.full_name" class="barber-img" />
+              <img
+                :src="getImageUrl(barber.image)"
+                :alt="barber.full_name"
+                class="barber-img"
+                @error="onImageError($event)"
+              />
               <h4>{{ barber.full_name }}</h4>
-              <button class="select-barber">+</button>
+              <button class="select-barber" title="Seleccionar barbero">+</button>
             </div>
           </div>
         </div>
@@ -77,8 +82,11 @@ export default {
       }
     },
     getImageUrl(imageName) {
-      if (!imageName) return '/assets/img/default-barber.jpg';
+      if (!imageName) return '/img/background/BarberoPredeterminado.png';
       return `http://localhost:5000/uploads/${imageName}`;
+    },
+    onImageError(event) {
+      event.target.src = '/img/background/BarberoPredeterminado.png';
     },
     selectBarber(barber) {
       this.selectedBarber = barber;
@@ -104,7 +112,7 @@ export default {
       });
     },
     goBack() {
-      this.$router.go(-1);  // Vuelve a la página anterior en el historial
+      this.$router.go(-1);
     },
   },
   mounted() {
@@ -139,6 +147,7 @@ export default {
   font-weight: normal;
   font-style: normal;
 }
+
 body {
   background-color: black;
   color: white;
@@ -150,7 +159,7 @@ body {
 }
 
 .barber-name {
-  color: #CCAF54; /* Dorado */
+  color: #CCAF54;
 }
 
 .custom-card {
@@ -167,16 +176,16 @@ body {
   border: 2px solid #CCAF54;
   color: #fff;
   padding: 15px;
-  text-align: center;
   border-radius: 5px;
   margin: 10px 0;
   transition: 0.3s ease-in-out;
-  height: 320px; /* Fijamos la altura */
+  height: 320px;
   display: flex;
   flex-direction: column;
+  align-items: center; /* 🔸 centrado horizontal del contenido */
   justify-content: space-between;
+  text-align: center;
 }
-
 
 .barber-card:hover {
   transform: scale(1.02);
@@ -190,7 +199,6 @@ body {
   object-fit: cover;
   margin: 0 auto;
 }
-
 
 .barber-card h4 {
   margin-top: 10px;
@@ -208,6 +216,9 @@ body {
   color: black;
   cursor: pointer;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .barber-card .select-barber:hover {
@@ -254,4 +265,3 @@ body {
   background-color: #444;
 }
 </style>
-

@@ -95,3 +95,16 @@ export const getQuotesByBarberAndDate = async (barberId, date) => {
     throw error;
   }
 };
+
+
+
+// 🔹 Enviar correo con los detalles de la cita
+export const sendQuoteEmail = async (emailData) => {
+  try {
+    const response = await axios.post(`${QUOTES_API_URL}/send-email`, emailData, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error('Error al enviar el correo de la cita:', error.response?.data || error.message);
+    throw error;
+  }
+};
